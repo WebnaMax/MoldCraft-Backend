@@ -24,11 +24,12 @@ const authMiddleware = (req, res, next) => {
     next();
 };
 
-// GET: Получение контента DraftEditor
-router.get('/content', authMiddleware, async (req, res) => {
+// GET: Получение контента DraftEditor (без авторизации для публичного доступа)
+router.get('/content', async (req, res) => {
     try {
         const doc = await Content.findOne({ contentId: 'draftEditorContent' });
         console.log('Fetched document:', doc);
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.json({ content: doc ? doc.content : null });
     } catch (err) {
         console.error('Error fetching content from MongoDB:', err);
@@ -36,7 +37,7 @@ router.get('/content', authMiddleware, async (req, res) => {
     }
 });
 
-// POST: Сохранение контента DraftEditor
+// POST: Сохранение контента DraftEditor (с авторизацией)
 router.post('/content', authMiddleware, async (req, res) => {
     try {
         const { content } = req.body;
@@ -56,12 +57,13 @@ router.post('/content', authMiddleware, async (req, res) => {
     }
 });
 
-// GET: Получение контента секции EditorPage
-router.get('/section/:sectionKey', authMiddleware, async (req, res) => {
+// GET: Получение контента секции EditorPage (без авторизации для публичного доступа)
+router.get('/section/:sectionKey', async (req, res) => {
     try {
         const { sectionKey } = req.params;
         const doc = await Section.findOne({ sectionKey });
         console.log(`Fetched section ${sectionKey}:`, doc);
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.json({ content: doc ? doc.content : null });
     } catch (err) {
         console.error(`Error fetching section ${sectionKey} from MongoDB:`, err);
@@ -69,7 +71,7 @@ router.get('/section/:sectionKey', authMiddleware, async (req, res) => {
     }
 });
 
-// POST: Сохранение контента секции EditorPage
+// POST: Сохранение контента секции EditorPage (с авторизацией)
 router.post('/section/:sectionKey', authMiddleware, async (req, res) => {
     try {
         const { sectionKey } = req.params;
