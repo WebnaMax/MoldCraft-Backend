@@ -39,9 +39,9 @@ mongoose.connection.on('error', err => {
 
 // Подключение маршрутов
 const apiRoutes = require('./routes/api');
-const contentRoutes = require('./contentRoutes'); // Укажи правильный путь
-app.use('/api', apiRoutes); // Маршруты для категорий и продуктов
-app.use('/api/content', contentRoutes); // Маршруты для DraftEditor и EditorPage
+const contentRoutes = require('./contentRoutes');
+app.use('/api', apiRoutes);
+app.use('/api/content', contentRoutes);
 app.use('/public', express.static('public'));
 
 const PORT = process.env.PORT || 5000;
