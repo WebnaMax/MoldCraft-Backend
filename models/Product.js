@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   originalPrice: { type: Number, min: 0 },
   discount: { type: Number, default: 0, min: 0, max: 100 },
-  images: [{ type: String }],
+  images: [{ type: String }], // Массив строк для путей к изображениям
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true }
 });
 
