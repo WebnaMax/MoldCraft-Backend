@@ -1,16 +1,11 @@
 const express = require('express');
-const contentRoutes = require('../contentRoutes'); // Путь к contentRoutes.js
-const app = express();
-
-// Подключаем middleware для обработки JSON
-app.use(express.json());
-
-// Подключение маршрутов для категорий и продуктов
-const router = express.Router();
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
+
+// Создаем маршрутизатор
+const router = express.Router();
 
 // Настройка multer для сохранения файлов
 const storage = multer.diskStorage({
@@ -161,14 +156,5 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
-// Подключение маршрутов для категорий и продуктов
-app.use('/api', router);
-
-// Подключение маршрутов для контента (EditorPage и DraftEditor)
-app.use('/api', contentRoutes);
-
-// Запуск сервера
-const port = process.env.PORT || 5000; // Используем process.env.PORT для Render
-app.listen(port, () => {
-  console.log(`Server running at port ${port}`);
-});
+// Экспортируем маршрутизатор
+module.exports = router;
