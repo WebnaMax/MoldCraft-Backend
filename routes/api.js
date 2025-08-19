@@ -28,7 +28,7 @@ const upload = multer({
       cb(new Error('Only images (jpeg, jpg, png, gif) are allowed!'));
     }
   }
-}).array('images', 2); // Уменьшен лимит до 2 файлов
+}).array('images', 6); // Уменьшен лимит до 2 файлов
 
 // Middleware для обработки ошибок Multer
 const handleMulterError = (err, req, res, next) => {
