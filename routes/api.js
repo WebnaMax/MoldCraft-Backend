@@ -5,6 +5,8 @@ const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
 
+// const API_URL = 'https://f2eec49e40dc5b.lhr.life/api';
+
 // Настройка multer для сохранения файлов
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -17,7 +19,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, // 1MB
+  limits: { fileSize: 1000000 },
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -28,7 +30,7 @@ const upload = multer({
       cb(new Error('Only images (jpeg, jpg, png, gif) are allowed!'));
     }
   }
-}).array('images', 6); // Лимит 6 файлов
+}).array('images', 4);
 
 // Middleware для обработки ошибок Multer
 const handleMulterError = (err, req, res, next) => {
@@ -40,40 +42,40 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-// Получение всех категорий с лимитом
+// Получение всех категорий
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await Category.find().populate('parentCategory').limit(100);
+    const categories = await Category.find().populate('parentCategory');
     res.json(categories);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Получение всех продуктов с лимитом
+// Получение всех продуктов
 router.get('/products', async (req, res) => {
   try {
-    const products = await Product.find().populate('category').limit(100);
+    const products = await Product.find().populate('category');
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Получение продуктов по категории с лимитом
+// Получение продуктов по категории
 router.get('/products/category/:categoryId', async (req, res) => {
   try {
-    const products = await Product.find({ category: req.params.categoryId }).populate('category').limit(100);
+    const products = await Product.find({ category: req.params.categoryId }).populate('category');
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Получение продуктов со скидкой с лимитом
+// Получение продуктов со скидкой
 router.get('/products-discounted', async (req, res) => {
   try {
-    const products = await Product.find({ discount: { $gt: 0 } }).populate('category').limit(100);
+    const products = await Product.find({ discount: { $gt: 0 } }).populate('category');
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -128,8 +130,8 @@ router.put('/products/:id', upload, handleMulterError, async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
 
-    const { name, shortDescription, description, price, originalPrice, discount, category, existingImages } = req.body;
-    const images = req.files.length > 0 ? req.files.map(file => `/public/images/${file.filename}`).concat(product.images.filter(img => !existingImages?.includes(img))) : product.images;
+    const { name, shortDescription, description, price, originalPrice, discount, category } = req.body;
+    const images = req.files.length > 0 ? req.files.map(file => `/public/images/${file.filename}`).concat(product.images.filter(img => !req.body.existingImages.includes(img))) : product.images;
     Object.assign(product, {
       name,
       shortDescription,
@@ -162,3 +164,25 @@ router.delete('/products/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+// const express = require('express');
+const contentRoutes = require('../contentRoutes'); // Путь к contentRoutes.js
+const app = express();
+const port = 'https://moldcraft-backend.onrender.com'; // Укажи свой порт
+// const port = '5000'; // Укажи свой порт
+
+
+app.use(express.json());
+
+// Подключение новых маршрутов
+app.use('/api', contentRoutes);
+
+// Твой существующий код сервера (не трогаем его)
+// Например:
+// app.get('/existing-endpoint', (req, res) => { ... });
+// app.post('/existing-endpoint', (req, res) => { ... });
+
+app.listen(port, () => {
+  console.log(`Server running at https://moldcraft-backend.onrender.com`);
+  // console.log(`Server running at http//localhost:${port}`);
+});
