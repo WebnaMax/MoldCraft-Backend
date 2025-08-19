@@ -14,7 +14,7 @@ app.use(cors({
 }));
 
 // Ограничение размера JSON-payload
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '15kb' }));
 
 // Проверка наличия MONGODB_URI
 if (!process.env.MONGODB_URI) {
