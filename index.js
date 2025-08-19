@@ -7,14 +7,14 @@ const app = express();
 
 // Настройка CORS
 app.use(cors({
-    origin: 'https://moldcraft.md/',
+    origin: 'https://moldcraft.md', // Без завершающего слэша
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Ограничение размера JSON-payload
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '15kb' }));
 
 // Проверка наличия MONGODB_URI
 if (!process.env.MONGODB_URI) {
