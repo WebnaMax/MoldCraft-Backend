@@ -16,6 +16,9 @@ app.use(cors({
 // Ограничение размера JSON-payload
 app.use(express.json({ limit: '500kb' }));
 
+// Обработка form-data для Multer
+app.use(express.urlencoded({ extended: true }));
+
 // Проверка наличия MONGODB_URI
 if (!process.env.MONGODB_URI) {
     console.error('MONGODB_URI is not defined in .env file');
@@ -39,5 +42,5 @@ const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 app.use('/public', express.static('public')); // Для обслуживания статических файлов
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, // Уменьшен до 0.5 MB
+  limits: { fileSize: 1000000 }, // 1MB
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -28,7 +28,7 @@ const upload = multer({
       cb(new Error('Only images (jpeg, jpg, png, gif) are allowed!'));
     }
   }
-}).array('images', 6); // Уменьшен лимит до 2 файлов
+}).array('images', 6); // Лимит 6 файлов
 
 // Middleware для обработки ошибок Multer
 const handleMulterError = (err, req, res, next) => {

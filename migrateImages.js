@@ -8,12 +8,14 @@ async function migrateImages() {
             throw new Error('MONGODB_URI is not defined in .env file');
         }
         await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
+            maxPoolSize: 5,
+            minPoolSize: 1,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000
         });
         console.log('Connected to MongoDB');
 
-        const products = await Product.find({ images: { $exists: false } });
+        const products = await Product.find({ images: { $exists: false } }).limit(100); // Батч для оптимизации
         for (const product of products) {
             product.images = ['/public/images/default.jpg']; // Замените на реальные пути
             await product.save();
