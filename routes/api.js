@@ -1,11 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
 
-// Создаем маршрутизатор
-const router = express.Router();
+// const API_URL = 'https://f2eec49e40dc5b.lhr.life/api';
 
 // Настройка multer для сохранения файлов
 const storage = multer.diskStorage({
@@ -42,7 +42,7 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-// Маршруты для категорий и продуктов
+// Получение всех категорий
 router.get('/categories', async (req, res) => {
   try {
     const categories = await Category.find().populate('parentCategory');
@@ -52,6 +52,7 @@ router.get('/categories', async (req, res) => {
   }
 });
 
+// Получение всех продуктов
 router.get('/products', async (req, res) => {
   try {
     const products = await Product.find().populate('category');
@@ -61,6 +62,7 @@ router.get('/products', async (req, res) => {
   }
 });
 
+// Получение продуктов по категории
 router.get('/products/category/:categoryId', async (req, res) => {
   try {
     const products = await Product.find({ category: req.params.categoryId }).populate('category');
@@ -70,6 +72,7 @@ router.get('/products/category/:categoryId', async (req, res) => {
   }
 });
 
+// Получение продуктов со скидкой
 router.get('/products-discounted', async (req, res) => {
   try {
     const products = await Product.find({ discount: { $gt: 0 } }).populate('category');
@@ -79,6 +82,7 @@ router.get('/products-discounted', async (req, res) => {
   }
 });
 
+// Получение продукта по ID
 router.get('/products/:id', async (req, res) => {
   try {
     console.log('Fetching product with ID:', req.params.id);
@@ -91,6 +95,7 @@ router.get('/products/:id', async (req, res) => {
   }
 });
 
+// Создание продукта
 router.post('/products', upload, handleMulterError, async (req, res) => {
   try {
     console.log('Received files:', req.files);
@@ -117,6 +122,7 @@ router.post('/products', upload, handleMulterError, async (req, res) => {
   }
 });
 
+// Обновление продукта
 router.put('/products/:id', upload, handleMulterError, async (req, res) => {
   try {
     console.log('Received files:', req.files);
@@ -145,6 +151,7 @@ router.put('/products/:id', upload, handleMulterError, async (req, res) => {
   }
 });
 
+// Удаление продукта
 router.delete('/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -156,5 +163,26 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
-// Экспортируем маршрутизатор
 module.exports = router;
+
+// const express = require('express');
+const contentRoutes = require('../contentRoutes'); // Путь к contentRoutes.js
+const app = express();
+const port = 'https://moldcraft-backend.onrender.com'; // Укажи свой порт
+// const port = '5000'; // Укажи свой порт
+
+
+app.use(express.json());
+
+// Подключение новых маршрутов
+app.use('/api', contentRoutes);
+
+// Твой существующий код сервера (не трогаем его)
+// Например:
+// app.get('/existing-endpoint', (req, res) => { ... });
+// app.post('/existing-endpoint', (req, res) => { ... });
+
+app.listen(port, () => {
+  console.log(`Server running at https://moldcraft-backend.onrender.com`);
+  // console.log(`Server running at http//localhost:${port}`);
+});
