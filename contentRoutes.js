@@ -24,6 +24,7 @@ router.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Cache-Control');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') {
+        console.log(`Handling OPTIONS request for ${req.url}`);
         return res.sendStatus(200);
     }
     next();
