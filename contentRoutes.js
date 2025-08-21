@@ -70,6 +70,9 @@ router.post('/content', authMiddleware, async (req, res) => {
             { upsert: true }
         );
         console.log('Saved content for /content (draftEditorContent):', { content, result });
+        if (result.matchedCount === 0 && result.upsertedCount === 0) {
+            console.error('No document updated or inserted for draftEditorContent');
+        }
         res.json({ message: 'Content saved' });
     } catch (err) {
         console.error('Error saving content to MongoDB:', err.message);
@@ -119,12 +122,18 @@ router.post('/section/:sectionKey', authMiddleware, async (req, res) => {
         console.log(`Connected to MongoDB for POST /section/${sectionKey} at ${new Date().toISOString()}`);
         const db = client.db(dbName);
         const collection = db.collection(sectionsCollection);
+        const existingDoc = await collection.findOne({ sectionKey });
+        console.log(`Existing document for ${sectionKey}:`, existingDoc);
         const result = await collection.updateOne(
             { sectionKey },
             { $set: { content, updatedAt: new Date() } },
             { upsert: true }
         );
         console.log(`Update result for section ${sectionKey}:`, { content, result });
+        if (result.matchedCount === 0 && result.upsertedCount === 0) {
+            console.error(`No document updated or inserted for sectionKey: ${sectionKey}`);
+            return res.status(500).json({ error: `Failed to update or insert document for ${sectionKey}` });
+        }
         res.json({ message: 'Section content saved' });
     } catch (err) {
         console.error(`Error saving section ${req.params.sectionKey} to MongoDB:`, err.message);
