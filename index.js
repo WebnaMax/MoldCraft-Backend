@@ -7,7 +7,7 @@ const app = express();
 
 // Настройка CORS
 app.use(cors({
-    origin: 'https://moldcraft.md', // Без завершающего слэша
+    origin: 'https://moldcraft.md',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -26,20 +26,25 @@ if (!process.env.MONGODB_URI) {
 }
 
 // Подключение к MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+})
     .then(() => console.log('Connected to MongoDB:', mongoose.connection.db.databaseName))
     .catch(err => {
-        console.error('MongoDB connection error:', err);
+        console.error('MongoDB connection error:', err.message);
         process.exit(1);
     });
 
 // Обработка ошибок Mongoose
 mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error:', err.message);
 });
 
 const apiRoutes = require('./routes/api');
+const contentRoutes = require('./routes/contentRoutes');
 app.use('/api', apiRoutes);
+app.use('/api', contentRoutes);
 app.use('/public', express.static('public')); // Для обслуживания статических файлов
 
 const PORT = process.env.PORT || 5000;
