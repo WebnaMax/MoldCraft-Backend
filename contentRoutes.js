@@ -5,7 +5,6 @@ const router = express.Router();
 // URL подключения к MongoDB Atlas
 const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://MaximTurcan:IBfXupgZZ6HlcuLB@clusterbesttools.3x7seo5.mongodb.net/toolshop?retryWrites=true&w=majority';
 const dbName = 'toolshop';
-const contentCollection = 'content';
 const sectionsCollection = 'sections';
 
 // Middleware для проверки пароля
@@ -18,7 +17,7 @@ const authMiddleware = (req, res, next) => {
     next();
 };
 
-// Middleware для CORS
+// Middleware для CORS и предотвращения кэширования
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'https://moldcraft.md');
     res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Cache-Control');
@@ -31,17 +30,17 @@ router.use((req, res, next) => {
     next();
 });
 
-// GET: Получение контента DraftEditor
+// GET: Получение контента (например, DraftEditor или секции)
 router.get('/content', authMiddleware, async (req, res) => {
     let client;
     try {
         client = new MongoClient(mongoUri);
         await client.connect();
-        console.log('Connected to MongoDB for GET /content');
+        console.log(`Connected to MongoDB for GET /content at ${new Date().toISOString()}`);
         const db = client.db(dbName);
-        const collection = db.collection(contentCollection);
-        const doc = await collection.findOne({ contentId: 'draftEditorContent' });
-        console.log('Fetched document:', doc);
+        const collection = db.collection(sectionsCollection);
+        const doc = await collection.findOne({ sectionKey: 'draftEditorContent' });
+        console.log('Fetched document for /content (draftEditorContent):', doc);
         res.json({ content: doc ? doc.content : null });
     } catch (err) {
         console.error('Error fetching content from MongoDB:', err.message);
@@ -51,7 +50,7 @@ router.get('/content', authMiddleware, async (req, res) => {
     }
 });
 
-// POST: Сохранение контента DraftEditor
+// POST: Сохранение контента (например, DraftEditor)
 router.post('/content', authMiddleware, async (req, res) => {
     let client;
     try {
@@ -62,15 +61,15 @@ router.post('/content', authMiddleware, async (req, res) => {
         }
         client = new MongoClient(mongoUri);
         await client.connect();
-        console.log('Connected to MongoDB for POST /content');
+        console.log(`Connected to MongoDB for POST /content at ${new Date().toISOString()}`);
         const db = client.db(dbName);
-        const collection = db.collection(contentCollection);
+        const collection = db.collection(sectionsCollection);
         const result = await collection.updateOne(
-            { contentId: 'draftEditorContent' },
-            { $set: { content } },
+            { sectionKey: 'draftEditorContent' },
+            { $set: { content, updatedAt: new Date() } },
             { upsert: true }
         );
-        console.log('Saved content:', { content, result });
+        console.log('Saved content for /content (draftEditorContent):', { content, result });
         res.json({ message: 'Content saved' });
     } catch (err) {
         console.error('Error saving content to MongoDB:', err.message);
@@ -80,19 +79,23 @@ router.post('/content', authMiddleware, async (req, res) => {
     }
 });
 
-// GET: Получение контента секции EditorPage
+// GET: Получение контента секции
 router.get('/section/:sectionKey', authMiddleware, async (req, res) => {
     let client;
     try {
         const { sectionKey } = req.params;
         client = new MongoClient(mongoUri);
         await client.connect();
-        console.log(`Connected to MongoDB for GET /section/${sectionKey}`);
+        console.log(`Connected to MongoDB for GET /section/${sectionKey} at ${new Date().toISOString()}`);
         const db = client.db(dbName);
         const collection = db.collection(sectionsCollection);
         const doc = await collection.findOne({ sectionKey });
-        console.log(`Fetched section ${sectionKey}:`, doc);
-        res.json({ content: doc ? doc.content : null });
+        console.log(`Fetched section ${sectionKey} from MongoDB:`, doc);
+        if (!doc) {
+            console.warn(`No document found for sectionKey: ${sectionKey}`);
+            return res.json({ content: null });
+        }
+        res.json({ content: doc.content });
     } catch (err) {
         console.error(`Error fetching section ${req.params.sectionKey} from MongoDB:`, err.message);
         res.status(500).json({ error: `Failed to load section content: ${err.message}` });
@@ -101,7 +104,7 @@ router.get('/section/:sectionKey', authMiddleware, async (req, res) => {
     }
 });
 
-// POST: Сохранение контента секции EditorPage
+// POST: Сохранение контента секции
 router.post('/section/:sectionKey', authMiddleware, async (req, res) => {
     let client;
     try {
@@ -113,15 +116,15 @@ router.post('/section/:sectionKey', authMiddleware, async (req, res) => {
         }
         client = new MongoClient(mongoUri);
         await client.connect();
-        console.log(`Connected to MongoDB for POST /section/${sectionKey}`);
+        console.log(`Connected to MongoDB for POST /section/${sectionKey} at ${new Date().toISOString()}`);
         const db = client.db(dbName);
         const collection = db.collection(sectionsCollection);
         const result = await collection.updateOne(
             { sectionKey },
-            { $set: { content } },
+            { $set: { content, updatedAt: new Date() } },
             { upsert: true }
         );
-        console.log(`Saved section ${sectionKey}:`, { content, result });
+        console.log(`Update result for section ${sectionKey}:`, { content, result });
         res.json({ message: 'Section content saved' });
     } catch (err) {
         console.error(`Error saving section ${req.params.sectionKey} to MongoDB:`, err.message);

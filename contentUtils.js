@@ -1,7 +1,7 @@
 export const getSectionContent = async (sectionKey, retries = 3, delay = 1000) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            console.log(`Attempt ${attempt} to fetch content for section: ${sectionKey}`);
+            console.log(`Attempt ${attempt} to fetch content for section: ${sectionKey} at ${new Date().toISOString()}`);
             const response = await fetch(`https://moldcraft-backend.onrender.com/api/content/section/${sectionKey}`, {
                 method: 'GET',
                 headers: {
@@ -12,7 +12,7 @@ export const getSectionContent = async (sectionKey, retries = 3, delay = 1000) =
             });
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`Failed to fetch section ${sectionKey}: ${response.status} ${errorText}`);
+                console.error(`Failed to fetch section ${sectionKey}: ${response.status} ${errorText} at ${new Date().toISOString()}`);
                 throw new Error(`Failed to fetch section ${sectionKey}: ${response.status} ${errorText}`);
             }
             const data = await response.json();
