@@ -46,7 +46,7 @@ router.get('/section/:sectionKey', authMiddleware, async (req, res) => {
         console.log(`Fetched section ${sectionKey} from MongoDB:`, doc);
         if (!doc) {
             console.warn(`No document found for sectionKey: ${sectionKey}`);
-            return res.status(404).json({ content: null, message: 'Section not found' });
+            return res.status(404).json({ message: 'Section not found' });
         }
         res.json({ content: doc.content });
     } catch (err) {
