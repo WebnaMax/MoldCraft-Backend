@@ -23,6 +23,7 @@ router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'https://moldcraft.md');
     res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Cache-Control');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     if (req.method === 'OPTIONS') {
         console.log(`Handling OPTIONS request for ${req.url}`);
         return res.sendStatus(200);
@@ -64,12 +65,12 @@ router.post('/content', authMiddleware, async (req, res) => {
         console.log('Connected to MongoDB for POST /content');
         const db = client.db(dbName);
         const collection = db.collection(contentCollection);
-        await collection.updateOne(
+        const result = await collection.updateOne(
             { contentId: 'draftEditorContent' },
             { $set: { content } },
             { upsert: true }
         );
-        console.log('Saved content:', content);
+        console.log('Saved content:', { content, result });
         res.json({ message: 'Content saved' });
     } catch (err) {
         console.error('Error saving content to MongoDB:', err.message);
@@ -115,12 +116,12 @@ router.post('/section/:sectionKey', authMiddleware, async (req, res) => {
         console.log(`Connected to MongoDB for POST /section/${sectionKey}`);
         const db = client.db(dbName);
         const collection = db.collection(sectionsCollection);
-        await collection.updateOne(
+        const result = await collection.updateOne(
             { sectionKey },
             { $set: { content } },
             { upsert: true }
         );
-        console.log(`Saved section ${sectionKey}:`, content);
+        console.log(`Saved section ${sectionKey}:`, { content, result });
         res.json({ message: 'Section content saved' });
     } catch (err) {
         console.error(`Error saving section ${req.params.sectionKey} to MongoDB:`, err.message);

@@ -46,7 +46,7 @@ try {
     const apiRoutes = require('./routes/api');
     const contentRoutes = require('./contentRoutes');
     app.use('/api', apiRoutes);
-    app.use('/api/content', contentRoutes); // Изменено: /api/content вместо /api
+    app.use('/api/content', contentRoutes);
     console.log('Routes registered: /api (apiRoutes), /api/content (contentRoutes)');
 } catch (err) {
     console.error('Error loading routes:', err.message);
