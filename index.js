@@ -42,7 +42,7 @@ mongoose.connection.on('error', err => {
 });
 
 const apiRoutes = require('./routes/api');
-const contentRoutes = require('./routes/contentRoutes');
+const contentRoutes = require('./contentRoutes');
 app.use('/api', apiRoutes);
 app.use('/api', contentRoutes);
 app.use('/public', express.static('public')); // Для обслуживания статических файлов
