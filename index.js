@@ -10,7 +10,7 @@ app.use(cors({
     origin: 'https://moldcraft.md',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control']
 }));
 
 // Ограничение размера JSON-payload
@@ -41,11 +41,30 @@ mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err.message);
 });
 
-const apiRoutes = require('./routes/api');
-const contentRoutes = require('./contentRoutes');
-app.use('/api', apiRoutes);
-app.use('/api', contentRoutes);
+// Подключение маршрутов
+try {
+    const apiRoutes = require('./routes/api');
+    const contentRoutes = require('./contentRoutes');
+    app.use('/api', apiRoutes);
+    app.use('/api', contentRoutes);
+} catch (err) {
+    console.error('Error loading routes:', err.message);
+    process.exit(1);
+}
+
 app.use('/public', express.static('public')); // Для обслуживания статических файлов
+
+// Обработка ошибок 404
+app.use((req, res, next) => {
+    console.warn(`404: Route not found - ${req.method} ${req.url}`);
+    res.status(404).json({ error: 'Route not found' });
+});
+
+// Общий обработчик ошибок
+app.use((err, req, res, next) => {
+    console.error('Server error:', err.message);
+    res.status(500).json({ error: `Server error: ${err.message}` });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

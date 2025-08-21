@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 const router = express.Router();
 
 // URL подключения к MongoDB Atlas
-const mongoUri = 'mongodb+srv://MaximTurcan:IBfXupgZZ6HlcuLB@clusterbesttools.3x7seo5.mongodb.net/toolshop?retryWrites=true&w=majority';
+const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://MaximTurcan:IBfXupgZZ6HlcuLB@clusterbesttools.3x7seo5.mongodb.net/toolshop?retryWrites=true&w=majority';
 const dbName = 'toolshop';
 const contentCollection = 'content';
 const sectionsCollection = 'sections';
@@ -21,7 +21,7 @@ const authMiddleware = (req, res, next) => {
 // Middleware для CORS
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'https://moldcraft.md');
-    res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Cache-Control');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
