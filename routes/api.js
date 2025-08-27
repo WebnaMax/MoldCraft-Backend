@@ -3,17 +3,24 @@ const router = express.Router();
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const multer = require('multer');
-const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
 
-// const API_URL = 'https://f2eec49e40dc5b.lhr.life/api';
+// Настройка Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Настройка multer для сохранения файлов
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+// Настройка Multer для Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'tools_images',
+    allowed_formats: ['jpeg', 'jpg', 'png', 'gif'],
+    public_id: (req, file) => `tool_${Date.now()}_${file.originalname}`
   }
 });
 
@@ -101,7 +108,7 @@ router.post('/products', upload, handleMulterError, async (req, res) => {
     console.log('Received files:', req.files);
     console.log('Received body:', req.body);
     const { name, shortDescription, description, price, originalPrice, discount, category } = req.body;
-    const images = req.files ? req.files.map(file => `/public/images/${file.filename}`) : [];
+    const images = req.files ? req.files.map(file => file.path) : [];
     const productData = {
       name,
       shortDescription,
@@ -131,7 +138,7 @@ router.put('/products/:id', upload, handleMulterError, async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
 
     const { name, shortDescription, description, price, originalPrice, discount, category } = req.body;
-    const images = req.files.length > 0 ? req.files.map(file => `/public/images/${file.filename}`).concat(product.images.filter(img => !req.body.existingImages.includes(img))) : product.images;
+    const images = req.files.length > 0 ? req.files.map(file => file.path).concat(product.images.filter(img => !req.body.existingImages.includes(img))) : product.images;
     Object.assign(product, {
       name,
       shortDescription,
@@ -156,6 +163,15 @@ router.delete('/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
+    if (product.images.length > 0) {
+      const publicIds = product.images.map(url => {
+        const match = url.match(/tools_images\/(.+?)\.(jpeg|jpg|png|gif)$/);
+        return match ? `tools_images/${match[1]}` : null;
+      }).filter(id => id);
+      if (publicIds.length > 0) {
+        await cloudinary.api.delete_resources(publicIds);
+      }
+    }
     await product.deleteOne();
     res.json({ message: 'Товар удален' });
   } catch (err) {
@@ -164,25 +180,3 @@ router.delete('/products/:id', async (req, res) => {
 });
 
 module.exports = router;
-
-// const express = require('express');
-const contentRoutes = require('../contentRoutes'); // Путь к contentRoutes.js
-const app = express();
-const port = 'https://moldcraft-backend.onrender.com'; // Укажи свой порт
-// const port = '5000'; // Укажи свой порт
-
-
-app.use(express.json());
-
-// Подключение новых маршрутов
-app.use('/api', contentRoutes);
-
-// Твой существующий код сервера (не трогаем его)
-// Например:
-// app.get('/existing-endpoint', (req, res) => { ... });
-// app.post('/existing-endpoint', (req, res) => { ... });
-
-app.listen(port, () => {
-  console.log(`Server running at https://moldcraft-backend.onrender.com`);
-  // console.log(`Server running at http//localhost:${port}`);
-});
