@@ -7,11 +7,14 @@ const app = express();
 
 // Настройка CORS
 app.use(cors({
-    origin: 'https://moldcraft.md',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: 'https://moldcraft.md', // Разрешаем только ваш домен
+    credentials: true, // Разрешаем куки и заголовки авторизации
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Явно указываем методы
+    allowedHeaders: ['Content-Type', 'Authorization'], // Разрешаем необходимые заголовки
 }));
+
+// Обработка OPTIONS запросов
+app.options('*', cors()); // Разрешаем preflight запросы для всех маршрутов
 
 app.use(express.json({ limit: '500kb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -39,4 +42,4 @@ const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT} at ${new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' })}`));
