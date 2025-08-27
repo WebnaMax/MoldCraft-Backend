@@ -16,7 +16,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Обработка OPTIONS запросов
-app.options('*', cors(corsOptions));
+// Removed app.options('*', cors(corsOptions)); as it's redundant and causing the error
+// The cors middleware handles OPTIONS automatically
 
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] Incoming request: ${req.method} ${req.url}`);

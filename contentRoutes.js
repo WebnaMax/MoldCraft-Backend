@@ -15,15 +15,8 @@ const authMiddleware = (req, res, next) => {
     next();
 };
 
-router.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    next();
-});
+// Removed the custom CORS middleware as it's handled in index.js
+// This avoids potential conflicts
 
 router.get('/content', authMiddleware, async (req, res) => {
     let client;
