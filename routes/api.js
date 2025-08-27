@@ -191,4 +191,10 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
+// Проверка на наличие некорректных маршрутов (отладка)
+router.get('*', (req, res) => {
+  console.error(`[${new Date().toISOString()}] Invalid route: ${req.url}`);
+  res.status(404).json({ message: 'Route not found' });
+});
+
 module.exports = router;
