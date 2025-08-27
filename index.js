@@ -6,15 +6,22 @@ require('dotenv').config();
 const app = express();
 
 // Настройка CORS
-app.use(cors({
-    origin: 'https://moldcraft.md', // Разрешаем только ваш домен
-    credentials: true, // Разрешаем куки и заголовки авторизации
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Явно указываем методы
-    allowedHeaders: ['Content-Type', 'Authorization'], // Разрешаем необходимые заголовки
-}));
+const corsOptions = {
+    origin: 'https://moldcraft.md',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200 // Некоторые браузеры требуют 200 для OPTIONS
+};
+app.use(cors(corsOptions));
 
 // Обработка OPTIONS запросов
-app.options('*', cors()); // Разрешаем preflight запросы для всех маршрутов
+app.options('*', cors(corsOptions));
+
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] Incoming request: ${req.method} ${req.url}`);
+    next();
+});
 
 app.use(express.json({ limit: '500kb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -27,14 +34,14 @@ if (!process.env.MONGODB_URI) {
 
 // Подключение к MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB:', mongoose.connection.db.databaseName))
+    .then(() => console.log(`[${new Date().toISOString()}] Connected to MongoDB: ${mongoose.connection.db.databaseName}`))
     .catch(err => {
-        console.error('MongoDB connection error:', err);
+        console.error(`[${new Date().toISOString()}] MongoDB connection error:`, err);
         process.exit(1);
     });
 
 mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
+    console.error(`[${new Date().toISOString()}] MongoDB connection error:`, err);
 });
 
 // Подключение маршрутов
@@ -42,4 +49,4 @@ const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT} at ${new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' })}`));
+app.listen(PORT, () => console.log(`[${new Date().toISOString()}] Server running on port ${PORT}`));
